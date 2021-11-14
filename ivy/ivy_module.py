@@ -1,12 +1,12 @@
 #
 # Copyright (c) Microsoft Corporation. All Rights Reserved.
 #
-import ivy_utils as iu
-import ivy_logic as il
-import ivy_logic_utils as lu
-import ivy_solver
-import ivy_concept_space as ics
-import ivy_ast
+from . import ivy_utils as iu
+from . import ivy_logic as il
+from . import ivy_logic_utils as lu
+from . import ivy_solver
+from . import ivy_concept_space as ics
+from . import ivy_ast
 
 from collections import defaultdict
 import string
@@ -107,7 +107,7 @@ class Module(object):
 
     def get_axioms(self):
         res = self.axioms
-        for n,sch in self.schemata.iteritems():
+        for n,sch in self.schemata.items():
             res += sch.formula.instances
         return res
 
@@ -226,8 +226,8 @@ class Module(object):
     def copy(self):
         m = Module()
         from copy import copy
-        for x,y in self.__dict__.iteritems():
-            if x is 'sig':
+        for x,y in self.__dict__.items():
+            if x == 'sig':
                 m.__dict__[x] = y.copy()
             else:
                 m.__dict__[x] = copy(y)
@@ -276,7 +276,7 @@ class Module(object):
 
     def call_graph(self):
         callgraph = defaultdict(list)
-        for actname,action in self.actions.iteritems():
+        for actname,action in self.actions.items():
             for called_name in action.iter_calls():
                 callgraph[called_name].append(actname)
         return callgraph
@@ -297,7 +297,7 @@ resort_concept_spaces = resort_asts
 
 def resort_map_symbol_sort(m):
     return dict((lu.resort_symbol(sym,sort_refinement),lu.resort_sort(sort,sort_refinement))
-                for sym,sort in m.iteritems())
+                for sym,sort in m.items())
 
 def resort_name_ast_pairs(pairs):
     return [(n,lu.resort_ast(a,sort_refinement)) for n,a in pairs]
@@ -314,12 +314,12 @@ def remove_refined_sortnames_from_list(sorts):
     return list(n for n in sorts if n not in refd)
 
 def resort_aliases_map(amap):
-    res = dict(amap.iteritems())
-    for s1,s2 in sort_refinement.iteritems():
+    res = dict(iter(amap.items()))
+    for s1,s2 in sort_refinement.items():
         res[s1.name] = s2.name
 
 def resort_map_any_ast(m):
-    return dict((a,lu.resort_ast(b,sort_refinement)) for a,b in m.iteritems())
+    return dict((a,lu.resort_ast(b,sort_refinement)) for a,b in m.items())
 
 
 module = None
@@ -333,7 +333,7 @@ def instantiate_non_epr(non_epr,ground_terms):
                 ldf,cnst = non_epr[term.rep]
                 subst = dict((v,t) for v,t in zip(ldf.formula.args[0].args,term.args)
                              if not isinstance(v,il.Variable))
-                if all(lu.is_ground_ast(x) for x in subst.values()):
+                if all(lu.is_ground_ast(x) for x in list(subst.values())):
                        inst = lu.substitute_constants_ast(cnst,subst)
                        theory.append(inst)
 #                iu.dbg('inst')

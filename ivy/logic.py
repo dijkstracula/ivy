@@ -6,8 +6,8 @@
 
 from operator import itemgetter
 
-from general import IvyError
-from utils.recstruct_object import recstruct
+from .general import IvyError
+from .utils.recstruct_object import recstruct
 
 # Exceptions
 
@@ -444,13 +444,13 @@ if __name__ == '__main__':
     assert contains_topsort(h)
 
     b = NamedBinder('mybinder', [X,Y,Z], None, Implies(And(f(X,Y), f(X,Z)), Eq(Y,Z)))
-    print b
-    print b.sort
-    print
+    print(b)
+    print(b.sort)
+    print()
 
     b = NamedBinder('mybinder', [X,Y,Z], None, Z)
-    print b
-    print b.sort
+    print(b)
+    print(b.sort)
 
 
     # TODO: add more tests, add tests for errors

@@ -5,9 +5,9 @@
 Ivy abstract syntax trees.
 """
 
-from ivy_utils import flatten, gen_to_set, UniqueRenamer, compose_names, split_name, IvyError, base_name, ivy_compose_character, LocationTuple
-import ivy_utils as iu
-import ivy_logic
+from .ivy_utils import flatten, gen_to_set, UniqueRenamer, compose_names, split_name, IvyError, base_name, ivy_compose_character, LocationTuple
+from . import ivy_utils as iu
+from . import ivy_logic
 import re
 
 reference_lineno = None
@@ -1350,7 +1350,7 @@ class ActionDef(Definition):
         return self.args[1].iter_internal_defines()
     def clone(self,args):
         if not hasattr(self.args[1],'lineno'):
-            print 'no lineno!!!!!: {}'.format(self)
+            print('no lineno!!!!!: {}'.format(self))
         res = ActionDef(args[0],args[1])
         res.formal_params = self.formal_params
         res.formal_returns = self.formal_returns
@@ -1703,7 +1703,7 @@ def ast_rewrite(x,rewrite):
         return x.clone(ast_rewrite(x.args,rewrite)) # yikes!
     if x is None:
         return None
-    print "wtf: {} {}".format(x,type(x))
+    print("wtf: {} {}".format(x,type(x)))
     assert False
 
 def subst_prefix_atoms_ast(ast,subst,pref,to_pref,static=None):

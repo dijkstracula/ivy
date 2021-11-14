@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All Rights Reserved.
 #
 import ply.lex as lex
-import ivy_utils as iu
+from . import ivy_utils as iu
 
 tokens = (
    'COMMA',
@@ -223,7 +223,7 @@ class TokenErrorNode(object):
 
 def t_error(t):
     raise iu.IvyError(TokenErrorNode(t),"illegal character '{}'".format(t.value[0]))
-    print "Illegal character '%s'" % t.value[0]
+    print("Illegal character '%s'" % t.value[0])
 
 lexer = lex.lex(errorlog=lex.NullLogger())
 

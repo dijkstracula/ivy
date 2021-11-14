@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation. All Rights Reserved.
 #
 
-import ivy_utils as iu
-import ivy_logic as il
-import ivy_logic_utils as lu
-import ivy_ast as ia
-import logic_util
+from . import ivy_utils as iu
+from . import ivy_logic as il
+from . import ivy_logic_utils as lu
+from . import ivy_ast as ia
+from . import logic_util
 
 class Redefinition(iu.IvyError):
     pass
@@ -27,7 +27,7 @@ class MatchProblem(object):
         self.prem_matches=prem_matches
         self.revmap = dict()
     def __str__(self):
-        return '{{pat:{},inst:{},freesyms:{}}}'.format(self.pat,self.inst,map(str,self.freesyms))
+        return '{{pat:{},inst:{},freesyms:{}}}'.format(self.pat,self.inst,list(map(str,self.freesyms)))
 
 def attrib_goals(proof,goals):
     if hasattr(proof,'lineno'):
@@ -51,14 +51,14 @@ class ProofChecker(object):
     
         self.axioms  = [normalize_goal(ax) for ax in axioms]
         self.definitions = dict((d.formula.defines().name,normalize_goal(d)) for d in definitions)
-        self.schemata = dict((x,normalize_goal(y)) for x,y in schemata.iteritems()) if schemata is not None else dict()
+        self.schemata = dict((x,normalize_goal(y)) for x,y in schemata.items()) if schemata is not None else dict()
         for ax in axioms:
             if ax.label is not None:
                 self.schemata[ax.name] = ax
         self.stale = set() # set of symbols that are not fresh
         for lf in axioms + definitions:
             self.stale.update(lu.used_symbols_ast(lf.formula))
-        for goal in schemata.values():
+        for goal in list(schemata.values()):
             vocab = goal_vocab(goal)
             self.stale.update(vocab.symbols)
 
@@ -199,12 +199,12 @@ class ProofChecker(object):
         return decls
 
     def show_goals_tactic(self,decls,proof):
-        print
-        print '{}Proof goals:'.format(proof.lineno)
+        print()
+        print('{}Proof goals:'.format(proof.lineno))
         for decl in decls:
-            print
-            print 'theorem ' + str(decl)
-            print
+            print()
+            print('theorem ' + str(decl))
+            print()
         return decls
 
     def defer_goal_tactic(self,decls,proof):
@@ -217,7 +217,7 @@ class ProofChecker(object):
         cond = il.And(*[il.Equals(a.args[0],a.args[1]) for a in defs])
         subgoal = ia.LabeledFormula(decls[0].label,il.Implies(cond,decls[0].formula))
         if not hasattr(decls[0],'lineno'):
-            print 'has no line number: {}'.format(decls[0])
+            print('has no line number: {}'.format(decls[0]))
             exit(1)
         subgoal.lineno = decls[0].lineno
         return attrib_goals(proof,[subgoal]) + decls[1:]
@@ -353,8 +353,8 @@ class ProofChecker(object):
         prob, pmatch = self.setup_schema_matching(decl,proof,schema,allow_witness=True)
         def iswit(x):
             return isinstance(x,il.Variable) and x not in prob.freesyms
-        witness = dict((x,y) for x,y in pmatch.iteritems() if iswit(x))
-        pmatch = dict((x,y) for x,y in pmatch.iteritems() if not iswit(x))
+        witness = dict((x,y) for x,y in pmatch.items() if iswit(x))
+        pmatch = dict((x,y) for x,y in pmatch.items() if not iswit(x))
 #        prem = make_goal(proof.lineno,fresh_label(goal_prems(decl)),[],schema)
         prem = prob.schema
         if schemaname not in premmap:
@@ -538,7 +538,7 @@ def goal_prem_goals(goal):
 # Check that there are no name clashes in a pair of goals
 
 def check_name_clash(g1,g2):
-    d1,d2 = map(goal_defns,(g1,g2))
+    d1,d2 = list(map(goal_defns,(g1,g2)))
     for s1 in d1:
         if s1 in d2:
             raise ProofError(None,'premise {} of sugboal clashes with context'.format(s1))
@@ -564,7 +564,7 @@ def goal_vocab(goal):
 # Check that the conclusions of two goals match
 
 def check_concs_match(g1,g2):
-    c1,c2 = map(goal_conc,(g1,g2))
+    c1,c2 = list(map(goal_conc,(g1,g2)))
     if not il.equal_mod_alpha(c1,c2):
         raise ProofError(None,'conclusions do not match:\n    {}\n     {}'.format(c1,c2))
 
@@ -595,9 +595,9 @@ def normalize_goal(x):
     if goal_is_defn(x):
         return x
     if not hasattr(x,'formula'):
-        print x
-        print type(x)
-    return clone_goal(x,map(normalize_goal,goal_prems(x)),il.normalize_ops(goal_conc(x)))
+        print(x)
+        print(type(x))
+    return clone_goal(x,list(map(normalize_goal,goal_prems(x))),il.normalize_ops(goal_conc(x)))
 
 def get_unprovided_defns(g1,g2):
     defns = goal_defns(g2)
@@ -663,7 +663,7 @@ def check_schema_capture(schema,goal):
             raise CaptureError(None,'"{}" is captured when importing "{}"'.format(sym,schema.name))
 
 def check_alpha_capture(goal,match):
-    rev_match = dict((y,x) for x,y in match.iteritems())
+    rev_match = dict((y,x) for x,y in match.items())
     for s in goal_free(goal).union(goal_defns(goal)):
         if s in rev_match and s not in match:
             raise CaptureError(None,'"{}" is captured by renaming "{}"'.format(s,rev_match[s]))
@@ -689,9 +689,9 @@ def rename_goal(goal,renaming):
     def rec_goal(goal):
         if not isinstance(goal,ia.LabeledFormula):
             return goal
-        goal = clone_goal(goal,map(rec_goal,goal_prems(goal)),goal_conc(goal))
+        goal = clone_goal(goal,list(map(rec_goal,goal_prems(goal))),goal_conc(goal))
         match = dict((x,x.rename(lambda n: rmap[x.name])) for x in goal_defns(goal) if x.name in rmap)
-        match = dict((x,apply_match_sym(match,y)) for x,y in match.iteritems())
+        match = dict((x,apply_match_sym(match,y)) for x,y in match.items())
         check_alpha_capture(goal,match)
         goal = apply_match_goal(match,goal,apply_match_alt)
         goal = clone_goal(goal,goal_prems(goal),il.alpha_rename(rmap,goal_conc(goal)))
@@ -733,8 +733,8 @@ def remove_vars_match(mat,fmla):
     """ Remove the variables bindings from a match. This is used to
     prevent variable capture when applying the match to premises. Make sure free variables
     are not captured by fmla """
-    res = dict((s,v) for s,v in mat.iteritems() if il.is_ui_sort(s))
-    sympairs = [(s,v) for s,v in mat.iteritems() if il.is_constant(s)]
+    res = dict((s,v) for s,v in mat.items() if il.is_ui_sort(s))
+    sympairs = [(s,v) for s,v in mat.items() if il.is_constant(s)]
     symfmlas = il.rename_vars_no_clash([v for s,v in sympairs],[fmla])
     res.update((s,w) for (s,v),w in zip(sympairs,symfmlas))
     return res
@@ -742,12 +742,12 @@ def remove_vars_match(mat,fmla):
 
 def show_match(m):
     if m is None:
-        print 'no match'
+        print('no match')
         return 
-    print 'match {'
-    for x,y in m.iteritems():
-        print '{} : {} |-> {}'.format(x,x.sort if hasattr(x,'sort') else 'type',y)
-    print '}'
+    print('match {')
+    for x,y in m.items():
+        print('{} : {} |-> {}'.format(x,x.sort if hasattr(x,'sort') else 'type',y))
+    print('}')
         
 def match_problem(schema,decl):
     """ Creating a matching problem from a schema and a declaration """
@@ -793,12 +793,12 @@ def transform_defn_match(prob):
     for x,y in zip(func_sorts(concsym),func_sorts(declsym)):
         if x in freesyms:
             if x in dmatch and dmatch[x] != y:
-                print "lhs sorts didn't match: {}, {}".format(x,y)
+                print("lhs sorts didn't match: {}, {}".format(x,y))
                 return None
             dmatch[x] = y
         else:
             if x != y:
-                print "lhs sorts didn't match: {}, {}".format(x,y)
+                print("lhs sorts didn't match: {}, {}".format(x,y))
                 return None
     concrhs = apply_match(dmatch,concrhs)
     freesyms = apply_match_freesyms(dmatch,freesyms)
@@ -928,7 +928,7 @@ def compile_match(proof_match,prob,decl,allow_witness=False):
 def match_rhs_vars(match):
     """ Get the symbols occurring free on the right-hand side of a match """
     res = set()
-    for w in match.values():
+    for w in list(match.values()):
         for v in w if isinstance(w,list) else [w]:
             if isinstance(v,(il.UninterpretedSort,il.EnumeratedSort)):
                 res.add(v)
@@ -962,8 +962,8 @@ def apply_match_goal(match,x,apply_match,env = None):
 def apply_match_match(match,orig_match,apply_match):
     """ Apply a match match to match orig_match. Applying the resulting match should
     have the same effect as apply first orig_match, then match. """
-    orig_match = dict((x,apply_match(match,y)) for x,y in orig_match.iteritems())
-    orig_match.update((x,y) for x,y in match.iteritems() if x not in orig_match)
+    orig_match = dict((x,apply_match(match,y)) for x,y in orig_match.items())
+    orig_match.update((x,y) for x,y in match.items() if x not in orig_match)
     return orig_match
 
 def apply_match_to_problem(match,prob,apply_match):
@@ -971,13 +971,13 @@ def apply_match_to_problem(match,prob,apply_match):
     prob.schema = apply_match_goal(match,prob.schema,apply_match)
     prob.pat = apply_match(match,prob.pat)
     prob.freesyms = apply_match_freesyms(match,prob.freesyms)
-    prob.revmap = dict((x,y) for x,y in prob.revmap.iteritems() if x not in match)
+    prob.revmap = dict((x,y) for x,y in prob.revmap.items() if x not in match)
 
 def rename_problem(match,prob):
     prob.schema = apply_match_goal(match,prob.schema,apply_match_alt)
     prob.pat = apply_match_alt(match,prob.pat)
     prob.freesyms = set(match.get(sym,sym) for sym in prob.freesyms)
-    prob.revmap.update((y,x) for x,y in match.iteritems())
+    prob.revmap.update((y,x) for x,y in match.items())
 
 def avoid_capture_problem(prob,match):
     """ Rename a match problem to avoid capture when applying a
@@ -999,7 +999,7 @@ def detect_nonce_symbols(prob):
     remains after matching, we report the original symbol
     as clashing with the corresponding symbol in the goal."""
 
-    for sym in prob.revmap.values():
+    for sym in list(prob.revmap.values()):
         raise CaptureError(None,'Symbol {} in schema clashes with {} in goal.\nSuggest renaming or instantiating it.'.format(sym,sym))
 
 def trivial_goal(goal):
@@ -1171,7 +1171,7 @@ def term_sorts(term):
     return func_sorts(term.rep) if il.is_app(term) else [term.sort] if il.is_variable(term) else []
 
 def funcs_match(pat,inst,freesyms):
-    psorts,isorts = map(func_sorts,(pat,inst))
+    psorts,isorts = list(map(func_sorts,(pat,inst)))
     res = (pat.name == inst.name and len(psorts) == len(isorts)
             and all(x == y for x,y in zip(psorts,isorts) if x not in freesyms))
     return res
@@ -1202,7 +1202,7 @@ def extract_terms(inst,terms):
         for term,var in zip(terms,vars):
             if term == inst:
                 return var
-        return inst.clone(map(rec,inst.args))
+        return inst.clone(list(map(rec,inst.args)))
     return il.Lambda(vars,rec(inst))
 
 def fo_match(pat,inst,freesyms,constants):
@@ -1299,9 +1299,9 @@ def merge_matches(*matches):
         return dict()
     if any(match is None for match in matches):
         return None
-    res = dict(matches[0].iteritems())
+    res = dict(iter(matches[0].items()))
     for match2 in matches[1:]:
-        for sym,lmda in match2.iteritems():
+        for sym,lmda in match2.items():
             if sym in res:
                 if not equiv_alpha(lmda,res[sym]):
                     return None
@@ -1316,7 +1316,7 @@ def equiv_alpha(x,y):
     if x == y:
         return True
     if il.is_lambda(x) and il.is_lambda(y):
-        return x.body == il.substitute(y.body,zip(x.variables,y.variables))
+        return x.body == il.substitute(y.body,list(zip(x.variables,y.variables)))
     return False
     pass
 

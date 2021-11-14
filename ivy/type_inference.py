@@ -13,11 +13,11 @@ raised if the unification fails.
 
 from itertools import product, chain
 
-from logic import (Var, Const, Apply, Eq, Ite, Not, And, Or, Implies,
+from .logic import (Var, Const, Apply, Eq, Ite, Not, And, Or, Implies,
                    Iff, ForAll, Exists, NamedBinder)
-from logic import (UninterpretedSort, FunctionSort, Boolean, TopSort,
+from .logic import (UninterpretedSort, FunctionSort, Boolean, TopSort,
                    SortError, contains_topsort, is_polymorphic)
-from logic_util import used_constants, free_variables
+from .logic_util import used_constants, free_variables
 
 
 class SortVar(object):
@@ -305,28 +305,28 @@ if __name__ == '__main__':
 
     f1 = And(ps(XS), ps(xs))
     cf1 = concretize_sorts(f1)
-    print repr(f1)
-    print repr(cf1)
+    print(repr(f1))
+    print(repr(cf1))
     assert f1 == cf1
-    print
+    print()
 
     f2 = And(ps(XT), pt(xs))
     cf2 = concretize_sorts(f2)
-    print repr(f2)
-    print repr(cf2)
-    print
+    print(repr(f2))
+    print(repr(cf2))
+    print()
 
     f3 = Exists([TT], And(ps(XT), TT(xs)))
     cf3 = concretize_sorts(f3)
-    print repr(f3)
-    print repr(cf3)
-    print
+    print(repr(f3))
+    print(repr(cf3))
+    print()
 
     f4 = Iff(xt, Ite(yt, xt, XT))
     cf4 = concretize_sorts(f4)
-    print repr(f4)
-    print repr(cf4)
-    print
+    print(repr(f4))
+    print(repr(cf4))
+    print()
 
     # alpha = SortVar()
     # polyfS = FunctionSort(alpha, alpha)
@@ -339,19 +339,19 @@ if __name__ == '__main__':
 
     f6 = NamedBinder('mybinder', [XT], None, ps(XT))
     cf6 = concretize_sorts(f6)
-    print repr(f6)
-    print f6.sort
-    print repr(cf6)
-    print cf6.sort
-    print
+    print(repr(f6))
+    print(f6.sort)
+    print(repr(cf6))
+    print(cf6.sort)
+    print()
 
     f7 = NamedBinder('mybinder', [], None, ps(XT))
     cf7 = concretize_sorts(f7)
-    print repr(f7)
-    print f7.sort
-    print repr(cf7)
-    print cf7.sort
-    print
+    print(repr(f7))
+    print(f7.sort)
+    print(repr(cf7))
+    print(cf7.sort)
+    print()
 
 
     # TODO: add more tests, specifically a test that checks

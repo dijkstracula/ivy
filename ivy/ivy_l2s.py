@@ -46,21 +46,21 @@ self.sig
 from collections import defaultdict
 from itertools import chain
 
-from ivy_printer import print_module
-from ivy_actions import (AssignAction, Sequence, ChoiceAction,
+from .ivy_printer import print_module
+from .ivy_actions import (AssignAction, Sequence, ChoiceAction,
                          AssumeAction, AssertAction, HavocAction,
                          concat_actions, Action, CallAction)
-import ivy_ast
-import ivy_actions as iact
-import logic as lg
-import ivy_logic as ilg
-import ivy_logic_utils as ilu
-import ivy_utils as iu
-import ivy_temporal as itm
-import ivy_proof as ipr
-import ivy_module as im
-import ivy_compiler
-import ivy_theory as thy
+from . import ivy_ast
+from . import ivy_actions as iact
+from . import logic as lg
+from . import ivy_logic as ilg
+from . import ivy_logic_utils as ilu
+from . import ivy_utils as iu
+from . import ivy_temporal as itm
+from . import ivy_proof as ipr
+from . import ivy_module as im
+from . import ivy_compiler
+from . import ivy_theory as thy
 
 debug = iu.BooleanParameter("l2s_debug",False)
 
@@ -91,11 +91,11 @@ def trace_hook(tr):
     tr.hidden_symbols = lambda sym: sym.name.startswith('l2s_') or sym.name.startswith('_old_l2s_')
     for idx,state in enumerate(tr.states):
         for c in state.clauses.fmlas:
-            s1,s2 = map(str,c.args)
+            s1,s2 = list(map(str,c.args))
             if s1 == 'l2s_saved' and s2 == 'true':
                 tr.states[0 if idx == 0 else idx-1].loop_start = True
                 return tr
-    print "failed to find loop start!"
+    print("failed to find loop start!")
     return tr
     
 def l2s_tactic_int(prover,goals,proof,full):
@@ -173,7 +173,7 @@ def l2s_tactic_int(prover,goals,proof,full):
                 return lg.And(l2s_saved,apply_happened(expr.body))
         return expr.clone([desugar(a) for a in expr.args])
     
-    invars = map(desugar,invars)
+    invars = list(map(desugar,invars))
                           
     # Add the invariant phi to the list. TODO: maybe, if it is a G prop
     # invars.append(ipr.clone_goal(goal,[],invar))
@@ -211,28 +211,28 @@ def l2s_tactic_int(prover,goals,proof,full):
 
     not_lf = replace_temporals_by_l2s_g(lg.Not(fmla))
     if debug.get():
-        print "=" * 80 +"\nafter replace_temporals_by_named_binder_g_ast"+ "\n"*3
-        print "=" * 80 + "\nl2s_gs:"
+        print("=" * 80 +"\nafter replace_temporals_by_named_binder_g_ast"+ "\n"*3)
+        print("=" * 80 + "\nl2s_gs:")
         for vs, t, env in sorted(l2s_gs):
-            print vs, t, env
-        print "=" * 80 + "\n"*3
-        print model
-        print "=" * 80 + "\n"*3
+            print(vs, t, env)
+        print("=" * 80 + "\n"*3)
+        print(model)
+        print("=" * 80 + "\n"*3)
 
     # now we normalize all named binders
     mod_pass(ilu.normalize_named_binders)
     if debug.get():
-        print "=" * 80 +"\nafter normalize_named_binders"+ "\n"*3
-        print model
-        print "=" * 80 + "\n"*3
+        print("=" * 80 +"\nafter normalize_named_binders"+ "\n"*3)
+        print(model)
+        print("=" * 80 + "\n"*3)
 
     # construct the monitor related building blocks
 
     finite_sorts = set()
-    for name,sort in ilg.sig.sorts.iteritems():
+    for name,sort in ilg.sig.sorts.items():
         if thy.get_sort_theory(sort).is_finite() or name in mod.finite_sorts:
             finite_sorts.add(name)
-    uninterpreted_sorts = [s for s in ilg.sig.sorts.values() if type(s) is lg.UninterpretedSort and s.name not in finite_sorts]
+    uninterpreted_sorts = [s for s in list(ilg.sig.sorts.values()) if type(s) is lg.UninterpretedSort and s.name not in finite_sorts]
     reset_a = [
         AssignAction(l2s_a(s)(v), l2s_d(s)(v)).set_lineno(lineno)
         for s in uninterpreted_sorts
@@ -241,7 +241,7 @@ def l2s_tactic_int(prover,goals,proof,full):
     add_consts_to_d = [
         AssignAction(l2s_d(s)(c), lg.true).set_lineno(lineno)
         for s in uninterpreted_sorts
-        for c in ilg.sig.symbols.values() if c.sort == s
+        for c in list(ilg.sig.symbols.values()) if c.sort == s
     ]
     # TODO: maybe add all ground terms, not just consts (if stratified)
     # TODO: add conjectures that constants are in d and a
@@ -251,7 +251,7 @@ def l2s_tactic_int(prover,goals,proof,full):
     for b in ilu.named_binders_asts(model.invars):
 #        print 'binder: {} {} {}'.format(b.name,b.environ,b.body)
         named_binders_conjs[b.name].append((b.variables, b.body))
-    named_binders_conjs = defaultdict(list,((k,list(set(v))) for k,v in named_binders_conjs.iteritems()))
+    named_binders_conjs = defaultdict(list,((k,list(set(v))) for k,v in named_binders_conjs.items()))
 
     # in full mode, add all the state variables to 'to_save' and all
     # of the temporal operators to 'to_wait'
@@ -279,12 +279,12 @@ def l2s_tactic_int(prover,goals,proof,full):
     to_save += named_binders_conjs['l2s_s']
 
     if debug.get():
-        print "=" * 40 + "\nto_wait:\n"
+        print("=" * 40 + "\nto_wait:\n")
         for vs, t in to_wait:
-            print vs, t
-            print list(ilu.variables_ast(t)) == list(vs)
-            print
-        print "=" * 40
+            print(vs, t)
+            print(list(ilu.variables_ast(t)) == list(vs))
+            print()
+        print("=" * 40)
 
     save_state = [
         AssignAction(l2s_s(vs,t)(*vs), t).set_lineno(lineno)
@@ -395,10 +395,10 @@ def l2s_tactic_int(prover,goals,proof,full):
     to_g += list(l2s_gs)
     to_g = list(set(to_g))
     if debug.get():
-        print '='*40 + "\nto_g:\n"
+        print('='*40 + "\nto_g:\n")
         for vs, t, env in sorted(to_g):
-            print vs, t, '\n'
-        print '='*40
+            print(vs, t, '\n')
+        print('='*40)
 
     assume_g_axioms = [
         AssumeAction(forall(vs, lg.Implies(l2s_g(vs, t, env)(*vs), t))).set_lineno(lineno)
@@ -410,7 +410,7 @@ def l2s_tactic_int(prover,goals,proof,full):
 
 
     if debug.get():
-        print "public_actions:", model.calls
+        print("public_actions:", model.calls)
 
     # Tableau construction
     #
@@ -610,9 +610,9 @@ def l2s_tactic_int(prover,goals,proof,full):
     model.init =  iact.postfix_action(model.init,l2s_init)
 
     if debug.get():
-        print "=" * 80 + "\nafter patching actions" + "\n"*3
-        print model
-        print "=" * 80 + "\n"*3
+        print("=" * 80 + "\nafter patching actions" + "\n"*3)
+        print(model)
+        print("=" * 80 + "\n"*3)
 
     # now replace all named binders by fresh relations
 
@@ -624,7 +624,7 @@ def l2s_tactic_int(prover,goals,proof,full):
             [b.action for b in model.bindings],
     )):
         named_binders[b.name].append(b)
-    named_binders = defaultdict(list, ((k,list(sorted(set(v)))) for k,v in named_binders.iteritems()))
+    named_binders = defaultdict(list, ((k,list(sorted(set(v)))) for k,v in named_binders.items()))
     # make sure old_l2s_g is consistent with l2s_g
 #    assert len(named_binders['l2s_g']) == len(named_binders['_old_l2s_g'])
     named_binders['_old_l2s_g'] = [
@@ -633,20 +633,20 @@ def l2s_tactic_int(prover,goals,proof,full):
     ]
     subs = dict(
         (b, lg.Const('{}_{}'.format(k, i), b.sort))
-        for k, v in named_binders.iteritems()
+        for k, v in named_binders.items()
         for i, b in enumerate(v)
     )
     if debug.get():
-        print "=" * 80 + "\nsubs:" + "\n"*3
-        for k, v in subs.items():
-            print k, ' : ', v, '\n'
-        print "=" * 80 + "\n"*3
+        print("=" * 80 + "\nsubs:" + "\n"*3)
+        for k, v in list(subs.items()):
+            print(k, ' : ', v, '\n')
+        print("=" * 80 + "\n"*3)
     mod_pass(lambda ast: ilu.replace_named_binders_ast(ast, subs))
 
     if debug.get():
-        print "=" * 80 + "\nafter replace_named_binders" + "\n"*3
-        print model
-        print "=" * 80 + "\n"*3
+        print("=" * 80 + "\nafter replace_named_binders" + "\n"*3)
+        print(model)
+        print("=" * 80 + "\n"*3)
 
     # if len(gprops) > 0:
     #     assumes = [gprop_to_assume(x) for x in gprops]
