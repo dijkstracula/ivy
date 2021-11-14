@@ -1522,8 +1522,8 @@ class IvyARGSetup(IvyDeclInterp):
 def BalancedChoice(choices):
     if len(choices) == 1:
         return choices[0]
-    return ChoiceAction(BalancedChoice(choices[0:len(choices)/2]),
-                        BalancedChoice(choices[len(choices)/2:]))
+    return ChoiceAction(BalancedChoice(choices[0:len(choices)//2]),
+                        BalancedChoice(choices[len(choices)//2:]))
 
 def get_file_version(filename):
     try:
@@ -1531,7 +1531,7 @@ def get_file_version(filename):
     except:
         raise IvyError(None,"not found: %s" % filename)
     header = f.readline()
-    header = string.strip(header)
+    header = header.strip()
     if header.startswith('#lang ivy'):
         version = header[len('#lang ivy'):]
         if version.strip() != '':
@@ -2257,7 +2257,7 @@ def read_module(f,nested=False):
     from . import ivy_parser
     header = f.readline()
     s = '\n' + f.read() # newline at beginning to preserve line numbers
-    header = string.strip(header)
+    header = header.strip()
     if header.startswith('#lang ivy'):
         version = header[len('#lang ivy'):]
         if version.strip() != '':

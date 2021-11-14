@@ -4,7 +4,7 @@
 import sys
 import itertools
 from collections import defaultdict
-from . import z3
+import z3
 
 from .ivy_logic_utils import to_literal, false_clauses, Clauses
 from .ivy_solver import *

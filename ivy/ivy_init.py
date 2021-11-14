@@ -39,7 +39,8 @@ def read_params():
     ps = dict()
     args = sys.argv[1:]
     while args and '=' in args[0]:
-        thing = string.split(args[0],'=')
+        #thing = string.split(args[0],'=')
+        thing = args[0].split("=")
         if len(thing) > 2:
             usage()
         ps[thing[0]] = thing[1]
