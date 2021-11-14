@@ -118,7 +118,7 @@ class Module(object):
 
     def add_to_hierarchy(self,name):
         if iu.ivy_compose_character in name:
-            pref,suff = string.rsplit(name,iu.ivy_compose_character,1)
+            pref,suff = name.rsplit(iu.ivy_compose_character,1)
             self.add_to_hierarchy(pref)
             self.hierarchy[pref].add(suff)
         else:

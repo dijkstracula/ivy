@@ -23,6 +23,7 @@ from . import ivy_fragment as ifc
 import sys
 import os
 import platform
+import z3
 
 from collections import defaultdict
 from operator import mul
@@ -108,7 +109,7 @@ def get_indent(line):
         if char == ' ':
             lindent += 1
         elif char == '\t':
-            lindent = (lindent + 8) / 8 * 8
+            lindent = (lindent + 8) // 8 * 8
         else:
             break
     return lindent

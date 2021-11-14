@@ -11,7 +11,7 @@ from collections import defaultdict
 import re
 import functools
 
-from . import z3
+import z3
 from . import ivy_logic
 from .ivy_logic_utils import used_variables_clause, used_variables_ast, variables_ast,\
    to_clauses, constants_clauses, used_relations_clauses, rel_inst, fun_eq_inst, \
@@ -26,6 +26,7 @@ import sys
 
 # Following accounts for Z3 API symbols that are hidden as of Z3-4.5.0
 
+print(z3)
 z3_to_ast_array = z3._to_ast_array if '_to_ast_array' in z3.__dict__ else z3.z3._to_ast_array
 z3_to_expr_ref = z3._to_expr_ref if '_to_expr_ref' in z3.__dict__ else z3.z3._to_expr_ref
 

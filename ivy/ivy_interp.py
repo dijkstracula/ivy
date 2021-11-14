@@ -6,8 +6,8 @@ Symbolic interpreter for Ivy
 """
 
 import sys
-from . import z3
 import string
+import z3
 from collections import defaultdict
 
 from .ivy_logic import *
