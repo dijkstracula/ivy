@@ -2,15 +2,15 @@
 # Copyright (c) Microsoft Corporation. All Rights Reserved.
 #
 
-import ivy_ast
-import ivy_proof as pf
-import ivy_actions as ia
-import ivy_temporal as tm
-import ivy_logic as lg
-import ivy_utils as iu
-import ivy_trace as tr
-import ivy_logic_utils as lu
-import ivy_proof as pr
+from . import ivy_ast
+from . import ivy_proof as pf
+from . import ivy_actions as ia
+from . import ivy_temporal as tm
+from . import ivy_logic as lg
+from . import ivy_utils as iu
+from . import ivy_trace as tr
+from . import ivy_logic_utils as lu
+from . import ivy_proof as pr
 
 # This tactic reduces a safety property to initiatation and consecution
 # subgoals. TODO: we lose the annotation here, so we can't extract a

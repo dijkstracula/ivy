@@ -11,11 +11,11 @@ concept graphs """
 #TODO: the import *'s are creating conflicts
 import functools
 import string
-from ivy_graph import *
-import ivy_logic
-import ivy_logic_utils as lu
-import ivy_interp
-from ivy_utils import topological_sort
+from .ivy_graph import *
+from . import ivy_logic
+from . import ivy_logic_utils as lu
+from . import ivy_interp
+from .ivy_utils import topological_sort
 from collections import defaultdict
 
 repr = str
@@ -245,7 +245,7 @@ class GraphWidget(object):
         if hasattr(self,'fact_elems'):
             for fact in self.get_active_facts():
                 for elem in self.fact_elems[fact]:
-                    concepts = map(self.g.concept_from_id,elem)
+                    concepts = list(map(self.g.concept_from_id,elem))
                     if len(elem) == 1: # a node
                         self.select_node(concepts[0],True)
                     elif len(elem) == 3: # an edge
@@ -282,7 +282,7 @@ class GraphWidget(object):
             clauses, parent_state = p
             g.parent_state = parent_state
             g.set_state(ilu.and_clauses(parent_state.clauses,clauses),clear_constraints=True)
-            print "reverse: state = {}".format(g.state)
+            print("reverse: state = {}".format(g.state))
             # This is a HACK to support "diagram"
             g.reverse_result = (parent_state.clauses,clauses)
             self.update()
@@ -468,10 +468,10 @@ class GraphWidget(object):
     def materialize_from_selected(self,node):
         if hasattr(self,'mark'):
             sorts = tuple(self.g.node_sort(x) for x in [self.mark,node])
-            print "sorts: {}".format(sorts)
+            print("sorts: {}".format(sorts))
             for r in self.g.relations:
-                print "{}".format(r)
-                print ": {}".format(r.sorts)
+                print("{}".format(r))
+                print(": {}".format(r.sorts))
             rels = [r for r in self.g.relations if r.sorts == sorts]
             items = [self.g.concept_label(r) for r in rels]
             msg = "Materialize this relation from selected node:"

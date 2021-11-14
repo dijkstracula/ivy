@@ -11,16 +11,16 @@ from collections import defaultdict
 import re
 import functools
 
-import z3
-import ivy_logic
-from ivy_logic_utils import used_variables_clause, used_variables_ast, variables_ast,\
+from . import z3
+from . import ivy_logic
+from .ivy_logic_utils import used_variables_clause, used_variables_ast, variables_ast,\
    to_clauses, constants_clauses, used_relations_clauses, rel_inst, fun_eq_inst, \
    is_ground_lit, used_constants_clauses, substitute_constants_clauses, eq_atom, \
    functions_clauses, fun_inst, substitute_lit, used_constants_clause, used_symbols_clause,Clauses, used_symbols_clause, and_clauses, true_clauses, used_symbols_ast, sym_placeholders, used_symbols_clauses, ground_apps_clauses, dual_clauses
-from ivy_core import minimize_core, biased_core
-import ivy_utils as iu
-import ivy_unitres as ur
-import logic as lg
+from .ivy_core import minimize_core, biased_core
+from . import ivy_utils as iu
+from . import ivy_unitres as ur
+from . import logic as lg
 
 import sys
 
@@ -32,7 +32,7 @@ z3_to_expr_ref = z3._to_expr_ref if '_to_expr_ref' in z3.__dict__ else z3.z3._to
 use_z3_enums = True
 
 def set_seed(seed):
-    print 'setting seed to {}'.format(seed)
+    print('setting seed to {}'.format(seed))
     z3.set_param('smt.random_seed',seed)
 
 opt_seed = iu.Parameter("seed",0,process=int)
@@ -248,7 +248,7 @@ def range_sort_bounds_to_z3(itp):
     ub = term_to_z3(itp.ub)
     handle_range_sorts = True
     if not (z3.is_int_value(lb) and z3.is_int_value(lb)):
-        print "error: bounds for range sort {} are not interpreted as int"
+        print("error: bounds for range sort {} are not interpreted as int")
         exit(1)
     return lb,ub
 
@@ -310,7 +310,7 @@ def check_native_compat_sym(sym):
         raise iu.IvyError(None,'cannot interpret {} as {}: {}'.format(sym,ivy_logic.sig.interp[sym.name],e))
 
 def check_compat():
-    for name,value in ivy_logic.sig.interp.iteritems():
+    for name,value in ivy_logic.sig.interp.items():
         if name in ivy_logic.sig.symbols:
             sym = ivy_logic.sig.symbols[name]
             sorts = sym.sort.sorts if isinstance(sym.sort,ivy_logic.UnionSort) else [sym.sort]
@@ -414,8 +414,8 @@ def term_to_z3(term):
         return z3.If(formula_to_z3_int(term.args[0]),term_to_z3(term.args[1]),term_to_z3(term.args[2]))
     else:
         if not hasattr(term,'rep'):
-            print term
-            print term.lineno
+            print(term)
+            print(term.lineno)
         fun = z3_functions.get(term.rep)
         if fun is None:
             fun = lookup_native(term.rep,functions,"function")
@@ -580,7 +580,7 @@ def formula_to_z3_int(fmla):
         return res
     if ivy_logic.is_individual(fmla):
         return term_to_z3(fmla)
-    print "bad fmla: {!r}".format(fmla)
+    print("bad fmla: {!r}".format(fmla))
     assert False
 
 def formula_to_z3_closed(fmla):
@@ -710,7 +710,7 @@ class SortOrder(object):
         self.order = order
         self.model = model
     def __call__(self,x,y):
-        interp = zip(self.vs,(x,y))
+        interp = list(zip(self.vs,(x,y)))
         fact = substitute(self.order,*interp)
         fact_val = self.model.eval(fact)
 #        print "order: %s = %s" % (fact,fact_val)
@@ -728,7 +728,7 @@ def collect_numerals(z3term):
 def from_z3_numeral(z3term,sort):
     name = str(z3term)
     if not(name[0].isdigit() or name[0] == '"' or name[0] == '-'):
-        print "unexpected numeral from Z3 model: {}".format(name)
+        print("unexpected numeral from Z3 model: {}".format(name))
     return ivy_logic.Symbol(name,sort)
 
 def collect_model_values(sort,model,sym):
@@ -746,7 +746,7 @@ def mine_interpreted_constants(model,vocab):
             sort_values[sort].update(collect_model_values(sort,model,s))
     def get_const(c):
         return model.eval(term_to_z3(c),model_completion=True)
-    return dict((x,map(get_const,list(y))) for x,y in sort_values.iteritems())
+    return dict((x,list(map(get_const,list(y)))) for x,y in sort_values.items())
     
 def enumerated_range(sort):
     res = [z3_constants[x] for x in sort.defines()]
@@ -773,7 +773,7 @@ class HerbrandModel(object):
         vs = [ivy_logic.Variable(s,sort) for s in ["X","Y"]]
         order = ivy_logic.Symbol("<",ivy_logic.RelationSort([sort,sort]))
         order_atom = atom_to_z3(order(*vs))
-        z3_vs = map(term_to_z3,vs)
+        z3_vs = list(map(term_to_z3,vs))
 #        print "order_atom: {}".format(order_atom)
         try:
             fun = z3.Function
@@ -808,7 +808,7 @@ class HerbrandModel(object):
         z3_vs = [term_to_z3(v) for v in vs]
         insts = []
         for tup in itertools.product(*ranges):
-            interp = zip(z3_vs,tup)
+            interp = list(zip(z3_vs,tup))
             fact = substitute(z3_fmla,*interp)
             fact_val = m.eval(fact,model_completion=True)
 #            print "%s = %s" % (fact,fact_val)
@@ -852,7 +852,7 @@ def get_model_constant(m,t):
 #        print "model: {}".format(m.sexpr())
 #        print "term: {}".format(t)
         res = ivy_logic.Constant(ivy_logic.Symbol(s.defines()[0],s))
-        print "warning: model doesn't give a value for enumerated term {}. returning {}.".format(t,res)
+        print("warning: model doesn't give a value for enumerated term {}. returning {}.".format(t,res))
         return res
 #        assert False # model doesn't give a value for enumerated term
     return constant_from_z3(s,m.eval(term_to_z3(t),model_completion=True))
@@ -881,7 +881,7 @@ def clauses_imply_list(clauses1, clauses2_list):
     s.add(z1)
 
     res = []
-    negs = map(dual_clauses,clauses2_list)
+    negs = list(map(dual_clauses,clauses2_list))
         
     for clauses2 in negs:
         z2 = clauses_to_z3(clauses2)
@@ -1077,7 +1077,7 @@ def model_if_none(clauses1,implied,model):
                 s.add(formula_to_z3(sort_size_constraint(sort,sort_size)))
             if s.check() != z3.unsat:
                 m = get_model(s)
-                print "model = {}, size = {}".format(m,sort_size)
+                print("model = {}, size = {}".format(m,sort_size))
 ##        print "clauses1 = {}".format(clauses1)
 ##        print "z3c = {}".format(str(z3c))
                 syms = used_symbols_clauses(clauses1)
@@ -1098,7 +1098,7 @@ def decide(s,atoms=None):
     # f.close()
     res = s.check() if atoms == None else s.check(atoms)
     if res == z3.unknown:
-        print s.to_smt2()
+        print(s.to_smt2())
         raise iu.IvyError(None,"Solver produced inconclusive result")
     # print "}"
     return res
@@ -1129,15 +1129,15 @@ def get_small_model(clauses, sorts_to_minimize, relations_to_minimize, final_con
     """
 
     if opt_show_vcs.get():
-        print ''
-        print "definitions:"
+        print('')
+        print("definitions:")
         for df in clauses.defs:
-            print df
-            print
-        print "axioms:"
+            print(df)
+            print()
+        print("axioms:")
         for fmla in clauses.fmlas:
-            print fmla
-            print
+            print(fmla)
+            print()
 
     s = z3.Solver()
     the_fmla = clauses_to_z3(clauses)
@@ -1161,7 +1161,7 @@ def get_small_model(clauses, sorts_to_minimize, relations_to_minimize, final_con
                 fc.start()
                 if fc.assume():
                     if opt_show_vcs.get():
-                        print '\nassume: {}'.format(fc.cond())
+                        print('\nassume: {}'.format(fc.cond()))
                         sys.stdout.flush()
                     s.add(clauses_to_z3(fc.cond()))
                     assumes.append(fc.cond())
@@ -1173,7 +1173,7 @@ def get_small_model(clauses, sorts_to_minimize, relations_to_minimize, final_con
                     foo = fc.cond()
                     sys.stdout.flush()
                     if opt_show_vcs.get():
-                        print '\nassert: {}'.format(foo)
+                        print('\nassert: {}'.format(foo))
                         sys.stdout.flush()
                     the_fmla = clauses_to_z3(foo)
                     # iu.dbg('the_fmla')
@@ -1197,7 +1197,7 @@ def get_small_model(clauses, sorts_to_minimize, relations_to_minimize, final_con
         return None
 
     if shrink:
-        print "searching for a small model...",
+        print("searching for a small model...", end=' ')
         sys.stdout.flush()
         for x in chain(sorts_to_minimize, relations_to_minimize):
             for n in itertools.count(1):
@@ -1209,7 +1209,7 @@ def get_small_model(clauses, sorts_to_minimize, relations_to_minimize, final_con
                     break
                 else:
                     s.pop()
-        print "done"
+        print("done")
     m = get_model(s)
 #    print "model = {}".format(m)
 #    f = open("ivy.smt2","w")
@@ -1250,9 +1250,9 @@ def model_facts(h,ignore,clauses1,upclose=False):
 #    print "model_facts vc = {}".format(vc)
     # values of relations in formula
 #    print "used_relations_clauses = {}".format(used_relations_clauses(clauses1))
-    urc = dict((ivy_logic.normalize_symbol(r),n) for r,n in used_relations_clauses(clauses1).iteritems())
+    urc = dict((ivy_logic.normalize_symbol(r),n) for r,n in used_relations_clauses(clauses1).items())
     vr = [[l]
-          for (r,n) in urc.iteritems()
+          for (r,n) in urc.items()
           if not ignore(r)
           for l in relation_model_to_clauses(h,r,n)]
     # values of functions in formula
@@ -1284,7 +1284,7 @@ def numeral_assign(clauses,h):
             numv = h.eval_constant(num)
 #            print "eval: {}:{} = {}".format(num,num.sort,numv)
             if numv in foom:
-                print "two numerals assigned same value!: {} = {}".format(num,foom[numv])
+                print("two numerals assigned same value!: {} = {}".format(num,foom[numv]))
             else:
 #                print "assigning {} to {}".format(num,numv)
                 foom[numv] = num
@@ -1343,7 +1343,7 @@ def bound_quantifiers_clauses(h,clauses,reps):
        bq_res = ivy_logic.Implies(ivy_logic.And(*cnsts),fmla) if cnsts else fmla
        return bq_res
 
-   new_fmlas = map(bq,clauses.fmlas)
+   new_fmlas = list(map(bq,clauses.fmlas))
    return Clauses(fmlas=new_fmlas,defs=list(clauses.defs))
 
 def filter_redundant_facts(clauses,axioms):
@@ -1433,7 +1433,7 @@ def clauses_model_to_diagram(clauses1,ignore = None, implied = None,model = None
 #    print "foo = {}".format(unsat_core(and_clauses(uc,axioms),true_clauses(),clauses1))
 
     # filter out non-rep skolems
-    repset = set(c.rep for e,c in reps.iteritems())
+    repset = set(c.rep for e,c in reps.items())
 #    print "clauses_model_to_diagram repset = {}".format(repset)
     ign = lambda x,ignore=ignore: (ignore(x) and not x in repset)
     res = Clauses([cl for cl in res.fmlas if not any(ign(c) for c in used_symbols_ast(cl))])
@@ -1455,7 +1455,7 @@ def get_lit_facts(h,lit,res):
 ##    print "rows = {}".format(rows)
     for r in rows:
 ##        print "r = {}".format(r)
-        subst = dict(zip([v.rep for v in vs],r))
+        subst = dict(list(zip([v.rep for v in vs],r)))
 ##        print "subst = {}".format(subst)
         res += [substitute_lit(lit,subst)]
 
@@ -1519,7 +1519,7 @@ def encode_term(t,n,sort):
         try:
             m = sort.defines().index(t.rep.name)
         except ValueError:
-            print "{} : {} : {}".format(sort,sort.defines(),t.rep)
+            print("{} : {} : {}".format(sort,sort.defines(),t.rep))
             exit(1)
         return binenc(m,n)
     elif isinstance(t,ivy_logic.Variable):
@@ -1531,12 +1531,12 @@ def encode_term(t,n,sort):
 #        return [atom_to_z3(ivy_logic.Atom(t.rep + ':' + str(n-1-i),t.args))
 #                for i in range(n)]
         args = [term_to_z3(arg) for arg in t.args]
-        print "encode_term t={}".format(t)
+        print("encode_term t={}".format(t))
         sig = ivy_logic.RelationSort(t.rep.sort.dom).to_z3()
 
         res = [apply_z3_func(z3_function(t.rep.name + ':' + str(n-1-i),sig),args)
                for i in range(n)]
-        print "encode_term res={}".format(res)
+        print("encode_term res={}".format(res))
         return res
 
 def encode_equality(*terms):
@@ -1595,4 +1595,4 @@ if __name__ == '__main__':
         ivy_logic.sig.constructors.add(t)
     add_symbol('f',ivy_logic.FunctionSort([ivy_logic.universe],s))
     cls = to_clauses("f(x) = a & f(y) = b")
-    print clauses_model_to_clauses(cls)
+    print(clauses_model_to_clauses(cls))

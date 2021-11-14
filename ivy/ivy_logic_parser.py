@@ -2,9 +2,9 @@
 # Copyright (c) Microsoft Corporation. All Rights Reserved.
 #
 # This file contains parser rules for first-order formulas
-from ivy_ast import *
-import ivy_logic_utils
-import ivy_utils as iu
+from .ivy_ast import *
+from . import ivy_logic_utils
+from . import ivy_utils as iu
 
 def get_lineno(p,n):
     return iu.Location(iu.filename,p.lineno(n))

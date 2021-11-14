@@ -1,32 +1,32 @@
 #
 # Copyright (c) Microsoft Corporation. All Rights Reserved.
 #
-import ivy_init
-import ivy_interp as itp
-import ivy_actions as act
-import ivy_utils as utl
-import ivy_logic_utils as lut
-import ivy_logic as lg
-import ivy_utils as iu
-import ivy_module as im
-import ivy_alpha
-import ivy_art
-import ivy_interp
-import ivy_compiler
-import ivy_isolate
-import ivy_ast
-import ivy_theory as ith
-import ivy_transrel as itr
-import ivy_solver as islv
-import ivy_fragment as ifc
-import ivy_proof
-import ivy_trace
-import ivy_temporal as itmp
-import ivy_printer
-import ivy_l2s
-import ivy_mc
-import ivy_bmc
-import ivy_tactics
+from . import ivy_init
+from . import ivy_interp as itp
+from . import ivy_actions as act
+from . import ivy_utils as utl
+from . import ivy_logic_utils as lut
+from . import ivy_logic as lg
+from . import ivy_utils as iu
+from . import ivy_module as im
+from . import ivy_alpha
+from . import ivy_art
+from . import ivy_interp
+from . import ivy_compiler
+from . import ivy_isolate
+from . import ivy_ast
+from . import ivy_theory as ith
+from . import ivy_transrel as itr
+from . import ivy_solver as islv
+from . import ivy_fragment as ifc
+from . import ivy_proof
+from . import ivy_trace
+from . import ivy_temporal as itmp
+from . import ivy_printer
+from . import ivy_l2s
+from . import ivy_mc
+from . import ivy_bmc
+from . import ivy_tactics
 
 import sys
 from collections import defaultdict
@@ -41,7 +41,7 @@ opt_separate = iu.BooleanParameter("separate",None)
 
 def display_cex(msg,ag):
     if diagnose.get():
-        import tk_ui as ui
+        from . import tk_ui as ui
         iu.set_parameters({'mode':'induction'})
         ui.ui_main_loop(ag)
         exit(1)
@@ -50,8 +50,8 @@ def display_cex(msg,ag):
 def check_properties():
     if itp.false_properties():
         if diagnose.get():
-            print "Some properties failed."
-            import tk_ui as ui
+            print("Some properties failed.")
+            from . import tk_ui as ui
             iu.set_parameters({'mode':'induction'})
             gui = ui.new_ui()
             gui.tk.update_idletasks() # so that dialog is on top of main window
@@ -72,7 +72,7 @@ def show_counterexample(ag,state,bmc_res):
     gui_art(other_art)
 
 def gui_art(other_art):
-    import tk_ui as ui
+    from . import tk_ui as ui
 #    iu.set_parameters({'mode':'induction'})
     iu.set_parameters({'ui':'cti'})
     gui = ui.new_ui()
@@ -86,8 +86,8 @@ def check_conjectures(kind,msg,ag,state):
     failed = itp.undecided_conjectures(state)
     if failed:
         if diagnose.get():
-            print "{} failed.".format(kind)
-            import tk_ui as ui
+            print("{} failed.".format(kind))
+            from . import tk_ui as ui
             iu.set_parameters({'mode':'induction'})
             gui = ui.new_ui()
             agui = gui.add(ag)
@@ -115,8 +115,8 @@ def check_temporals():
             if prop.assumed:
                 pc.admit_axiom(prop)
             else:
-                print '\n    The following temporal property is being proved:\n'
-                print pretty_lf(prop) + ' ...',
+                print('\n    The following temporal property is being proved:\n')
+                print(pretty_lf(prop) + ' ...', end=' ')
                 sys.stdout.flush()
                 if prop.temporal:
                     proof = pmap.get(prop.id,None)
@@ -135,12 +135,12 @@ def check_temporals():
 
 
 def usage():
-    print "usage: \n  {} file.ivy".format(sys.argv[0])
+    print("usage: \n  {} file.ivy".format(sys.argv[0]))
     sys.exit(1)
 
 def find_assertions(action_name=None):
     res = []
-    actions = act.call_set(action_name,im.module.actions) if action_name else im.module.actions.keys()
+    actions = act.call_set(action_name,im.module.actions) if action_name else list(im.module.actions.keys())
     for actname in actions:
         action = im.module.actions[actname]
         for a in action.iter_subactions():
@@ -150,7 +150,7 @@ def find_assertions(action_name=None):
 
 def show_assertions():
     for a in find_assertions():
-        print '{}: {}'.format(a.lineno,a)
+        print('{}: {}'.format(a.lineno,a))
 
 checked_action_found = False
 
@@ -167,7 +167,7 @@ def get_checked_actions():
 failures = 0
 
 def print_dots():
-    print '...',
+    print('...', end=' ')
     sys.stdout.flush()
     
 
@@ -214,7 +214,7 @@ class ConjChecker(Checker):
         self.indent = indent
         Checker.__init__(self,lf.formula)
     def start(self):
-        print pretty_lf(self.lf,self.indent),
+        print(pretty_lf(self.lf,self.indent), end=' ')
         print_dots()
     def get_annot(self):
         return self.lf.annot if hasattr(self.lf,'annot') else None
@@ -224,7 +224,7 @@ class ConjAssumer(Checker):
         self.lf = lf
         Checker.__init__(self,lf.formula,invert=False)
     def start(self):
-        print pretty_lf(self.lf) + "  [assumed]"
+        print(pretty_lf(self.lf) + "  [assumed]")
     def assume(self):
         return True
 
@@ -255,9 +255,9 @@ class MatchHandler(object):
         #         self.show_sym(sym,sym)
         self.started = False
         self.renaming = dict()
-        print
-        print 'Trace follows...'
-        print 80 * '*'
+        print()
+        print('Trace follows...')
+        print(80 * '*')
 
     def show_sym(self,sym,renamed_sym):
         if sym in self.renaming and self.renaming[sym] == renamed_sym:
@@ -271,7 +271,7 @@ class MatchHandler(object):
             if lhs in self.current and self.current[lhs] == rhs:
                 continue
             self.current[lhs] = rhs
-            print '    {}'.format(rfmla)
+            print('    {}'.format(rfmla))
         
     def eval(self,cond):
         truth = self.model.eval_to_constant(cond)
@@ -296,11 +296,11 @@ class MatchHandler(object):
                     if sym not in env and not itr.is_new(sym) and not self.is_skolem(sym):
                         self.show_sym(sym,sym)
                 self.started = True
-            for sym,renamed_sym in env.iteritems():
+            for sym,renamed_sym in env.items():
                 if not itr.is_new(sym) and not self.is_skolem(sym):
                     self.show_sym(sym,renamed_sym)
 
-            print '{}{}'.format(action.lineno,action)
+            print('{}{}'.format(action.lineno,action))
 
     def do_return(self,action,env):
         pass
@@ -355,7 +355,7 @@ def check_fcs_in_state(mod,ag,post,fcs):
             if not opt_trace.get():
                 gui_art(handler)
             else:
-                print str(handler)
+                print(str(handler))
             exit(0)
     else:
         res = history.satisfy(axioms,gmc,filter_fcs(fcs))
@@ -395,7 +395,7 @@ def apply_conj_proofs(mod):
         if lf.id in pmap:
             proof = pmap[lf.id]
             subgoals = pc.admit_proposition(lf,proof)
-            subgoals = map(ivy_compiler.theorem_to_property,subgoals)
+            subgoals = list(map(ivy_compiler.theorem_to_property,subgoals))
             conjs.extend(subgoals)
         else:
             conjs.append(lf)
@@ -430,20 +430,20 @@ def check_isolate():
         axioms = [m for m in mod.labeled_axioms if m.id not in subgoalmap] 
         schema_instances = [m for m in mod.labeled_axioms if m.id in subgoalmap]
         if axioms:
-            print "\n    The following properties are assumed as axioms:"
+            print("\n    The following properties are assumed as axioms:")
             for lf in axioms:
-                print pretty_lf(lf)
+                print(pretty_lf(lf))
 
         if mod.definitions:
-            print "\n    The following definitions are used:"
+            print("\n    The following definitions are used:")
             for lf in mod.definitions:
-                print pretty_lf(lf)
+                print(pretty_lf(lf))
 
         if (mod.labeled_props or schema_instances) and not checked_action.get():
-            print "\n    The following properties are to be checked:"
+            print("\n    The following properties are to be checked:")
             if check:
                 for lf in schema_instances:
-                    print pretty_lf(lf) + " [proved by axiom schema]"
+                    print(pretty_lf(lf) + " [proved by axiom schema]")
                 ag = ivy_art.AnalysisGraph()
                 clauses1 = lut.true_clauses(annot=act.EmptyAnnotation())
                 pre = itp.State(value = clauses1)
@@ -453,7 +453,7 @@ def check_isolate():
                 check_fcs_in_state(mod,ag,pre,fcs)
             else:
                 for lf in schema_instances + mod.labeled_props:
-                    print pretty_lf(lf)
+                    print(pretty_lf(lf))
 
         # after checking properties, make them axioms, except temporals
         im.module.labeled_axioms.extend(p for p in im.module.labeled_props if not p.temporal)
@@ -461,25 +461,25 @@ def check_isolate():
 
 
         if mod.labeled_inits:
-            print "\n    The following properties are assumed initially:"
+            print("\n    The following properties are assumed initially:")
             for lf in mod.labeled_inits:
-                print pretty_lf(lf)
+                print(pretty_lf(lf))
         if mod.labeled_conjs:
-            print "\n    The inductive invariant consists of the following conjectures:"
+            print("\n    The inductive invariant consists of the following conjectures:")
             for lf in mod.labeled_conjs:
-                print pretty_lf(lf)
+                print(pretty_lf(lf))
 
         apply_conj_proofs(mod)
 
         if mod.isolate_info is not None and mod.isolate_info.implementations:
-            print "\n    The following action implementations are present:"
+            print("\n    The following action implementations are present:")
             for mixer,mixee,action in sorted(mod.isolate_info.implementations,key=lambda x: x[0]):
-                print "        {}implementation of {}".format(pretty_lineno(action),mixee)
+                print("        {}implementation of {}".format(pretty_lineno(action),mixee))
 
         if mod.isolate_info is not None and mod.isolate_info.monitors:
-            print "\n    The following action monitors are present:"
+            print("\n    The following action monitors are present:")
             for mixer,mixee,action in sorted(mod.isolate_info.monitors,key=lambda x: x[0]):
-                print "        {}monitor of {}".format(pretty_lineno(action),mixee)
+                print("        {}monitor of {}".format(pretty_lineno(action),mixee))
 
         # if mod.actions:
         #     print "\n    The following actions are present:"
@@ -487,21 +487,21 @@ def check_isolate():
         #         print "        {}{}".format(pretty_lineno(action),actname)
 
         if mod.initializers:
-            print "\n    The following initializers are present:"
+            print("\n    The following initializers are present:")
             for actname,action in sorted(mod.initializers, key=lambda x: x[0]):
-                print "        {}{}".format(pretty_lineno(action),actname)
+                print("        {}{}".format(pretty_lineno(action),actname))
 
         if mod.labeled_conjs and not checked_action.get():
-            print "\n    Initialization must establish the invariant"
+            print("\n    Initialization must establish the invariant")
             if check:
                 with itp.EvalContext(check=False):
                     ag = ivy_art.AnalysisGraph(initializer=lambda x:None)
                     check_conjs_in_state(mod,ag,ag.states[0])
             else:
-                print ''
+                print('')
 
         if mod.initializers:
-            print "\n    Any assertions in initializers must be checked",
+            print("\n    Any assertions in initializers must be checked", end=' ')
             if check:
                 ag = ivy_art.AnalysisGraph(initializer=lambda x:None)
                 fail = itp.State(expr = itp.fail_expr(ag.states[0].expr))
@@ -511,10 +511,10 @@ def check_isolate():
         checked_actions = get_checked_actions()
 
         if checked_actions and mod.labeled_conjs:
-            print "\n    The following set of external actions must preserve the invariant:"
+            print("\n    The following set of external actions must preserve the invariant:")
             for actname in sorted(checked_actions):
                 action = act.env_action(actname)
-                print "        {}{}".format(pretty_lineno(action),actname)
+                print("        {}{}".format(pretty_lineno(action),actname))
                 if check:
                     ag = ivy_art.AnalysisGraph()
                     pre = itp.State()
@@ -524,52 +524,52 @@ def check_isolate():
                         post = ag.execute(action, pre)
                     check_conjs_in_state(mod,ag,post,indent=12)
                 else:
-                    print ''
+                    print('')
 
 
 
         callgraph = defaultdict(list)
-        for actname,action in mod.actions.iteritems():
+        for actname,action in mod.actions.items():
             for called_name in action.iter_calls():
                 callgraph[called_name].append(actname)
 
         some_assumps = False
-        for actname,action in mod.actions.iteritems():
+        for actname,action in mod.actions.items():
             assumptions = [sub for sub in action.iter_subactions()
                                if isinstance(sub,act.AssumeAction)]
             if assumptions:
                 if not some_assumps:
-                    print "\n    The following program assertions are treated as assumptions:"
+                    print("\n    The following program assertions are treated as assumptions:")
                     some_assumps = True
                 callers = callgraph[actname]
                 if actname in mod.public_actions:
                     callers.append("the environment")
                 prettyname = actname[4:] if actname.startswith('ext:') else actname
                 prettycallers = [c[4:] if c.startswith('ext:') else c for c in callers]
-                print "        in action {} when called from {}:".format(prettyname,','.join(prettycallers))
+                print("        in action {} when called from {}:".format(prettyname,','.join(prettycallers)))
                 for sub in assumptions:
-                    print "            {}assumption".format(pretty_lineno(sub))
+                    print("            {}assumption".format(pretty_lineno(sub)))
 
         tried = set()
         some_guarants = False
-        for actname,action in mod.actions.iteritems():
+        for actname,action in mod.actions.items():
             guarantees = [sub for sub in action.iter_subactions()
                               if isinstance(sub,(act.AssertAction,act.Ranking))]
             if check_lineno is not None:
                 guarantees = [sub for sub in guarantees if sub.lineno == check_lineno]
             if guarantees:
                 if not some_guarants:
-                    print "\n    The following program assertions are treated as guarantees:"
+                    print("\n    The following program assertions are treated as guarantees:")
                     some_guarants = True
                 callers = callgraph[actname]
                 if actname in mod.public_actions:
                     callers.append("the environment")
                 prettyname = actname[4:] if actname.startswith('ext:') else actname
                 prettycallers = [c[4:] if c.startswith('ext:') else c for c in callers]
-                print "        in action {} when called from {}:".format(prettyname,','.join(prettycallers))
+                print("        in action {} when called from {}:".format(prettyname,','.join(prettycallers)))
                 roots = set(iu.reachable([actname],lambda x: callgraph[x]))
                 for sub in guarantees:
-                    print "            {}guarantee".format(pretty_lineno(sub)),
+                    print("            {}guarantee".format(pretty_lineno(sub)), end=' ')
                     if check and any(r in roots and (r,sub.lineno) not in tried for r in checked_actions):
                         print_dots()
                         old_checked_assert = act.checked_assert.get()
@@ -589,10 +589,10 @@ def check_isolate():
                                    some_failed = True
                                    break
                         if not some_failed:
-                            print 'PASS'
+                            print('PASS')
                         act.checked_assert.value = old_checked_assert
                     else:
-                        print ""
+                        print("")
 
         check_temporals()
 
@@ -650,16 +650,16 @@ def check_subgoals(goals,method=None):
                             if foo:
                                 global failures
                                 failures += 1
-                                print "FAIL\n"
+                                print("FAIL\n")
                                 if hasattr(goal,"trace_hook"):
                                     foo = goal.trace_hook(foo)
                                 if opt_trace.get():
-                                    print str(foo)
+                                    print(str(foo))
                                     exit(0)
                                 if diagnose.get():
                                     gui_art(foo)
                             else:
-                                print "PASS\n"
+                                print("PASS\n")
                     else:
                         check_isolate()
                 
@@ -673,7 +673,7 @@ ivy_proof.register_tactic('mc',mc_tactic)
 def all_assert_linenos():
     mod = im.module
     all = []
-    for actname,action in mod.actions.iteritems():
+    for actname,action in mod.actions.items():
         guarantees = [sub.lineno for sub in action.iter_subactions()
                       if isinstance(sub,(act.AssertAction,act.Ranking))]
         all.extend(guarantees)
@@ -713,8 +713,8 @@ def mc_isolate(isolate,meth=ivy_mc.check_isolate):
         with im.module.theory_context():
             res = meth()
             if res is not None:
-                print res
-                print 'FAIL'
+                print(res)
+                print('FAIL')
                 exit(1)
         return
     for lineno in all_assert_linenos():
@@ -724,8 +724,8 @@ def mc_isolate(isolate,meth=ivy_mc.check_isolate):
             with im.module.theory_context():
                 res = meth()
             if res is not None:
-                print res
-                print 'FAIL'
+                print(res)
+                print('FAIL')
                 exit(1)
             act.checked_assert.value = old_checked_assert
     
@@ -760,11 +760,11 @@ def check_module():
             if len(idef.verified()) == 0 or isinstance(idef,ivy_ast.TrustedIsolateDef):
                 continue # skip if nothing to verify
         if isolate:
-            print "\nIsolate {}:".format(isolate)
+            print("\nIsolate {}:".format(isolate))
         if isolate is not None and iu.compose_names(isolate,'macro_finder') in im.module.attributes:
             save_macro_finder = islv.opt_macro_finder.get()
             if save_macro_finder:
-                print "Turning off macro_finder"
+                print("Turning off macro_finder")
                 islv.set_macro_finder(False)
         with im.module.copy():
             ivy_isolate.create_isolate(isolate) # ,ext='ext'
@@ -784,9 +784,9 @@ def check_module():
                 check_isolate()
         if isolate is not None and iu.compose_names(isolate,'macro_finder') in im.module.attributes:
             if save_macro_finder:
-                print "Turning on macro_finder"
+                print("Turning on macro_finder")
                 islv.set_macro_finder(True)
-    print ''
+    print('')
     if failures > 0:
         raise iu.IvyError(None,"failed checks: {}".format(failures))
     if checked_action.get() and not checked_action_found:
@@ -798,7 +798,7 @@ def check_module():
 def main():
     import signal
     signal.signal(signal.SIGINT,signal.SIG_DFL)
-    import ivy_alpha
+    from . import ivy_alpha
     ivy_alpha.test_bottom = False # this prevents a useless SAT check
     ivy_init.read_params()
     if len(sys.argv) != 2 or not sys.argv[1].endswith('ivy'):
@@ -810,13 +810,13 @@ def main():
         with utl.ErrorPrinter():
             ivy_init.source_file(sys.argv[1],ivy_init.open_read(sys.argv[1]),create_isolate=False)
             if isinstance(act.checked_assert.get(),iu.LocationTuple) and act.checked_assert.get().filename == 'none.ivy' and act.checked_assert.get().line == 0:
-                print 'NOT CHECKED'
+                print('NOT CHECKED')
                 exit(0);
             check_module()
     if some_bounded:
-        print "BOUNDED"
+        print("BOUNDED")
     else:
-        print "OK"
+        print("OK")
 
 
 if __name__ == "__main__":

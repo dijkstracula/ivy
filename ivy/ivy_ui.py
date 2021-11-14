@@ -1,20 +1,20 @@
 #
 # Copyright (c) Microsoft Corporation. All Rights Reserved.
 #
-from ivy_interp import *
-from ivy_graph import *
+from .ivy_interp import *
+from .ivy_graph import *
 from string import *
 import copy
 import functools
 import pickle
-from ivy_concept_space import clauses_to_concept
-import ivy_actions
-import ivy_graph_ui
-import ivy_alpha
-from ivy_art import AnalysisGraph, AnalysisSubgraph
-from ivy_graph_ui import GraphWidget
-import ivy_ui_util as uu
-import ivy_utils as iu
+from .ivy_concept_space import clauses_to_concept
+from . import ivy_actions
+from . import ivy_graph_ui
+from . import ivy_alpha
+from .ivy_art import AnalysisGraph, AnalysisSubgraph
+from .ivy_graph_ui import GraphWidget
+from . import ivy_ui_util as uu
+from . import ivy_utils as iu
 
 # Following is a hint to center window. Needs more research.
 # from tkinter import *
@@ -177,7 +177,7 @@ class AnalysisGraphUI(object):
         g = self.g
         covering_node = self.get_mark()
         if covering_node is not None:
-            print "Trying to cover %s by %s" % (covered_node.id,covering_node.id)
+            print("Trying to cover %s by %s" % (covered_node.id,covering_node.id))
             with self.ui_parent.run_context():
                 if not g.cover(covered_node,covering_node):
                     raise IvyError(None,"Covering failed")
@@ -224,19 +224,19 @@ class AnalysisGraphUI(object):
     def do_state_action(self,a,node=None):
         with self.ui_parent.run_context():
             with EvalContext(check=False):
-                print "action {"
+                print("action {")
                 s = self.g.do_state_action(a,self.get_alpha())
-                print "state = {}".format(s)
-                print "} action %s" % a.args[0]
+                print("state = {}".format(s))
+                print("} action %s" % a.args[0])
         self.rebuild()
 
     # Evaluate an action at a node
 
     def execute_action(self,n,a):
         with self.ui_parent.run_context():
-            print "action %s {" % a
+            print("action %s {" % a)
             s = self.g.execute_action(a,n,self.get_alpha())
-            print "} action %s" % a
+            print("} action %s" % a)
         self.rebuild()
 
     # Display the reached states tree
@@ -467,7 +467,7 @@ class AnalysisGraphUI(object):
 
     def reverse_goal(self, state, clauses):
         if state.pred != None:
-            print "reverse from %s to %s: post_state = %s" % (state.id,state.pred.id,clauses)
+            print("reverse from %s to %s: post_state = %s" % (state.id,state.pred.id,clauses))
             next_state = state.pred
             clauses = reverse_update_concrete_clauses(state,clauses)
             return (clauses,state.pred)
@@ -563,7 +563,7 @@ class IvyUI(object):
             cmd = lambda idx: self.try_property(udc[idx])
             self.listbox_dialog(msg,udc_text,command=cmd)
         else:
-            print "type(prop) = {}".format(type(prop))
+            print("type(prop) = {}".format(type(prop)))
             if hasattr(prop,'lineno'):
                 filename,lineno = prop.lineno
                 self.browse(filename,lineno)

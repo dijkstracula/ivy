@@ -78,10 +78,10 @@ def fix_parsed_graph(g):
     g.del_node('graph')
     g.del_node('node')
     g.del_node('edge')
-    for l in g.obj_dict['nodes'].values():
+    for l in list(g.obj_dict['nodes'].values()):
         for n in l:
             fix_attrs(n)
-    for l in g.obj_dict['edges'].values():
+    for l in list(g.obj_dict['edges'].values()):
         for e in l:
             fix_attrs(e)
     fix_attrs(g.obj_dict)
@@ -91,7 +91,7 @@ def fix_parsed_graph(g):
         fix_parsed_graph(sg)
 
 def fix_attrs(t):
-    t['attributes'] = dict((x,y.strip('"').replace('\\\n','')) for x,y in t['attributes'].iteritems())
+    t['attributes'] = dict((x,y.strip('"').replace('\\\n','')) for x,y in t['attributes'].items())
 
 # Work around pydot printing bug by putting quotes around labels
 
@@ -182,15 +182,15 @@ if __name__ == "__main__":
     g.add_node('4',label='bar')
     g.add_edge('3','4','e1')
     g.add_subgraph(name='cluster_2',nbunch=['3','4'])
-    print g
+    print(g)
     g.layout()
-    print g
-    print 'nodes: {}'.format(g.g.get_node_list())
+    print(g)
+    print('nodes: {}'.format(g.g.get_node_list()))
     for n in g.nodes():
-        print n
-    print g.get_edge('1','2','e1')
-    print g.get_node('1')
+        print(n)
+    print(g.get_edge('1','2','e1'))
+    print(g.get_node('1'))
     for sg in g.subgraphs():
-        print sg.graph_attr['bb']
+        print(sg.graph_attr['bb'])
 
 

@@ -14,17 +14,17 @@
 
 """
 
-from ivy_utils import *
-from ivy_logic import *
+from .ivy_utils import *
+from .ivy_logic import *
 import string
-from ivy_lexer import *
+from .ivy_lexer import *
 import ply.yacc as yacc
 from functools import partial
-import ivy_logic
+from . import ivy_logic
 from itertools import chain
-from ivy_logic_parser_gen import formula_parser,term_parser
+from .ivy_logic_parser_gen import formula_parser,term_parser
 from collections import defaultdict
-import logic_util
+from . import logic_util
 
 
 class LogicParseError(Exception):
@@ -166,7 +166,7 @@ def substitute_ast(ast,subs):
         return subs.get(ast.rep,ast)
     if is_quantifier(ast):
         bounds = set(x.name for x in quantifier_vars(ast))
-        subs = dict((x,y) for x,y in subs.iteritems() if x not in bounds)
+        subs = dict((x,y) for x,y in subs.items() if x not in bounds)
     return ast.clone(substitute_ast(x,subs) for x in ast.args)
 
 def substitute_constants_ast(ast,subs):
@@ -317,10 +317,10 @@ def resort_ast(ast,subs):
 
 
 def resort_sig(subs):
-    ivy_logic.sig.symbols = dict((n,resort_symbol(s,subs)) for n,s in ivy_logic.sig.symbols.iteritems())
+    ivy_logic.sig.symbols = dict((n,resort_symbol(s,subs)) for n,s in ivy_logic.sig.symbols.items())
     refd = set(s.name for s in subs)
-    ivy_logic.sig.sorts = dict((n,resort_sort(s,subs)) for n,s in ivy_logic.sig.sorts.iteritems() if n not in refd)
-    ivy_logic.sig.interp = dict((n,s) for n,s in ivy_logic.sig.interp.iteritems() if n not in refd)
+    ivy_logic.sig.sorts = dict((n,resort_sort(s,subs)) for n,s in ivy_logic.sig.sorts.items() if n not in refd)
+    ivy_logic.sig.interp = dict((n,s) for n,s in ivy_logic.sig.interp.items() if n not in refd)
 
 
 # aliases for backward compat
@@ -731,8 +731,8 @@ def tseitin_encoding(f):
     global tseitin_context
     tc = tseitin_context
     if not tc:
-        print f
-        print type(f)
+        print(f)
+        print(type(f))
         raise ValueError()
     f = expand_abbrevs(f)
     if isinstance(f,And):
@@ -1226,19 +1226,19 @@ def or_clauses_int(rn,args):
                 defidx[s] = d
             else:
                 defidx[s] = Definition(d.args[0],Ite(v,d.args[1],defidx[s].args[1]))
-    defs = [d for n,d in defidx.iteritems()] # TODO: hash traversal dependency
+    defs = [d for n,d in defidx.items()] # TODO: hash traversal dependency
     res = Clauses(fmlas,defs)
     #    print "or_clauses_int res = {}".format(res)
     return res,vs,args
 
 def debug_clauses_list(cl):
     for clauses in cl:
-        print "definitions:"
+        print("definitions:")
         for df in clauses.defs:
-            print df
-        print "fmlas:"
+            print(df)
+        print("fmlas:")
         for fmla in clauses.fmlas:
-            print ivy_logic.close_formula(fmla)
+            print(ivy_logic.close_formula(fmla))
 
 def ite_clauses_int(rn,cond,args):
     assert len(args) == 2
@@ -1262,7 +1262,7 @@ def ite_clauses_int(rn,cond,args):
             defidx[s] = d
         else:
             defidx[s] = Definition(d.args[0],simp_ite(v,defidx[s].args[1],d.args[1]))
-    defs = [d for n,d in defidx.iteritems()] + [Definition(v,cond)] # TODO: hash traversal dependency
+    defs = [d for n,d in defidx.items()] + [Definition(v,cond)] # TODO: hash traversal dependency
     annot = None if a0 is None or a1 is None else a0.ite(v,a1)
     res = Clauses(fmlas,defs,annot)
     # print "ite_clauses_int res:"
@@ -1349,7 +1349,7 @@ def exists_quant_clauses_map(syms,clauses):
         if not eqcm_upd(lhs,rhs,symset,map2):
             if not eqcm_upd(rhs,lhs,symset,map2):
                 defs.append(df)
-    for v,w in map2.iteritems():
+    for v,w in map2.items():
         for x in w:
             map1[x] = v
     clauses = Clauses(clauses.fmlas,defs)
@@ -1500,7 +1500,7 @@ def witness_ast(pos,vs,witnesses,fmla):
 
 
 def reskolemize_clauses(clauses, skolemizer):
-    print clauses
+    print(clauses)
     cs = [c for c in used_constants_clauses(clauses) if '__' in c.rep]
 #    print "reskolemize_clauses c = {}".format(cs)
     sksubs = dict((c,skolemizer(Variable(c.rep,c.sort))) for c in cs)
