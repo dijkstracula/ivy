@@ -556,7 +556,7 @@ def p_error(token):
         report_error(ParseError(None,None,'unexpected end of input'));
 
 # the default language version is the latest
-ivy_latest_language_version = '1.7'
+ivy_latest_language_version = '1.8'
 ivy_language_version = ivy_latest_language_version
 ivy_compose_character = '.'
 ivy_have_polymorphism = True
