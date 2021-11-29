@@ -418,7 +418,7 @@ def destr_asgn_val(lhs,fmlas):
     vs = sym_placeholders(n)
     dlhs = n(*([lval] + vs[1:]))
     drhs = n(*([mut] + vs[1:]))
-    eqs = [eq_atom(v,a) for (v,a) in zip(vs,lhs.args)[1:] if not isinstance(a,Variable)]
+    eqs = [eq_atom(v,a) for (v,a) in zip(vs[1:],lhs.args[1:]) if not isinstance(a,Variable)]
     if eqs:
         fmlas.append(Or(And(*eqs),equiv_ast(dlhs,drhs)))
     for destr in ivy_module.module.sort_destructors[mut.sort.name]:
@@ -526,7 +526,7 @@ class AssignAction(Action):
             vs = sym_placeholders(n)
             dlhs = n(*([nondet(*mut.args)] + vs[1:]))
             drhs = n(*([mut] + vs[1:]))
-            eqs = [eq_atom(v,a) for (v,a) in zip(vs,lhs.args)[1:] if not isinstance(a,Variable)]
+            eqs = [eq_atom(v,a) for (v,a) in zip(vs[1:],lhs.args[1:]) if not isinstance(a,Variable)]
             if eqs:
                 fmlas.append(Or(And(*eqs),equiv_ast(dlhs,drhs)))
             for destr in ivy_module.module.sort_destructors[mut.sort.name]:
