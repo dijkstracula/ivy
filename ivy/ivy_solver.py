@@ -26,9 +26,20 @@ import sys
 
 # Following accounts for Z3 API symbols that are hidden as of Z3-4.5.0
 
-print(z3)
-z3_to_ast_array = z3._to_ast_array if '_to_ast_array' in z3.__dict__ else z3.z3._to_ast_array
-z3_to_expr_ref = z3._to_expr_ref if '_to_expr_ref' in z3.__dict__ else z3.z3._to_expr_ref
+try:
+    z3_to_ast_array = z3._to_ast_array
+    z3_to_expr_ref = z3._to_expr_ref
+except AttributeError:
+    try:
+        z3_to_ast_array = z3.z3._to_ast_array
+        z3_to_expr_ref = z3.z3._to_expr_ref
+    except AttributeError:
+        import importlib
+        z3z3 = importlib.import_module("z3.z3", package="z3")
+        z3_to_ast_array = z3z3._to_ast_array
+        z3_to_expr_ref = z3z3._to_expr_ref
+
+
 
 use_z3_enums = True
 
