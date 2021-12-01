@@ -1957,6 +1957,10 @@ def module_to_cpp_class(classname,basename):
 
     if target.get() in ["gen","test"]:
          header.append('#include "z3++.h"\n')
+         # Legacy header definition: z3 has since to `pragma once` versus
+         # old-school include guards (as of commit d0e20e44f) so this no longer
+         # appears in the preprocessor's identifiers.
+         header.append('#define Z3PP_H_')
 
 
     header.append(hash_h)
