@@ -289,8 +289,8 @@ class MatchHandler(object):
         
 #        iu.dbg('env')
         if hasattr(action,'lineno'):
-#            print '        env: {}'.format('{'+','.join('{}:{}'.format(x,y) for x,y in env.iteritems())+'}')
-#            inv_env = dict((y,x) for x,y in env.iteritems())
+#            print '        env: {}'.format('{'+','.join('{}:{}'.format(x,y) for x,y in env.items())+'}')
+#            inv_env = dict((y,x) for x,y in env.items())
             if not self.started:
                 for sym in self.vocab:
                     if sym not in env and not itr.is_new(sym) and not self.is_skolem(sym):
@@ -483,7 +483,7 @@ def check_isolate():
 
         # if mod.actions:
         #     print "\n    The following actions are present:"
-        #     for actname,action in sorted(mod.actions.iteritems()):
+        #     for actname,action in sorted(mod.actions.items()):
         #         print "        {}{}".format(pretty_lineno(action),actname)
 
         if mod.initializers:

@@ -1621,7 +1621,7 @@ def check_instantiations(mod,decls):
 def create_sort_order(mod):
     arcs = [(x,s) for s in mod.sort_order for x in im.sort_dependencies(mod,s,with_variants=False)]
     # # Remove arcs for recursive types. The first variant can't be recursive.
-    # variant_of = set((x.name,y) for y,l in mod.variants.iteritems() for x in l[1:])
+    # variant_of = set((x.name,y) for y,l in mod.variants.items() for x in l[1:])
     # arcs = [a for a in arcs if a in variant_of]
     # do nothing if sccs already sorted
     number = dict((x,i) for i,x in enumerate(mod.sort_order))
@@ -2212,7 +2212,7 @@ def ivy_compile(decls,mod=None,create_isolate=True,**kwargs):
                 isol.with_args = 0
                 mod.isolates['this'] = isol
             # print "actions:"
-            # for x,y in mod.actions.iteritems():
+            # for x,y in mod.actions.items():
             #     print iu.pretty("action {} = {}".format(x,y))
 
         # find all the global roots and add them to the "with" lists of all of the isolates

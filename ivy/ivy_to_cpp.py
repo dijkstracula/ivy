@@ -1938,7 +1938,7 @@ def module_to_cpp_class(classname,basename):
 # TODO: may want to call internal actions from testbench
 
 #    ra = iu.reachable(im.module.public_actions,lambda name: im.module.actions[name].iter_calls())
-#    im.module.actions = dict((name,act) for name,act in im.module.actions.iteritems() if name in ra)
+#    im.module.actions = dict((name,act) for name,act in im.module.actions.items() if name in ra)
 
     header = ivy_cpp.context.globals.code
     import platform
@@ -5748,7 +5748,7 @@ def add_conjs_to_actions():
     asserts = [ia.AssertAction(conj.formula).set_lineno(conj.lineno) for conj in im.module.labeled_conjs]
     seq = ia.Sequence(*asserts)
     im.module.actions = dict((actname,ia.append_to_action(action,seq)) if actname in im.module.public_actions else (actname,action)
-                             for actname,action in im.module.actions.iteritems())
+                             for actname,action in im.module.actions.items())
     im.module.initializers = [(name,ia.append_to_action(action,seq))
                               for (name,action) in im.module.initializers]
     im.module.initial_actions = [ia.append_to_action(action,seq)
