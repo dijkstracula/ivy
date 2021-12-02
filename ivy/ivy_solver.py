@@ -216,7 +216,7 @@ def clear():
 
 clear()    
 
-#z3_sorts_inv = dict((get_id(z3sort),ivysort) for ivysort,z3sort in z3_sorts.iteritems())
+#z3_sorts_inv = dict((get_id(z3sort),ivysort) for ivysort,z3sort in z3_sorts.items())
 z3_sorts_inv = {}
 
 def uninterpretedsort(us):
@@ -1326,7 +1326,7 @@ def clauses_model_to_clauses(clauses1,ignore = None, implied = None,model = None
     # if using numerals, replace the universe elements with them
     if numerals:
         m = numeral_assign(res,h)
-#        print "dict: {}".format([(str(x),str(y)) for x,y in m.iteritems()])
+#        print "dict: {}".format([(str(x),str(y)) for x,y in m.items()])
     # else, existentially quantify the names of the universe elements
     else:
         m = dict((c.rep,ivy_logic.Constant(c.rep.prefix('__')))

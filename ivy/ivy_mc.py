@@ -1472,7 +1472,7 @@ class AigerMatchHandler(object):
                         self.current[expr] = val
 
         if hasattr(action,'lineno'):
-#            print '        env: {}'.format('{'+','.join('{}:{}'.format(x,y) for x,y in env.iteritems())+'}')
+#            print '        env: {}'.format('{'+','.join('{}:{}'.format(x,y) for x,y in env.items())+'}')
             inv_env = dict((y,x) for x,y in env.items() if not my_is_skolem(x))
             for v in self.aiger.inputs:
                 iu.dbg('v')

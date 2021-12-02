@@ -264,7 +264,7 @@ def strip_action(ast,strip_map,strip_binding,is_init=False,init_params=[]):
             raise iu.IvyError(ast,"assignment may be interfering")
         strip_binding = strip_binding.copy()
         strip_binding.update(xtra_bindings)    
-#        print 'strip_binding = {}'.format([(str(x),str(y)) for x,y in strip_binding.iteritems()]) 
+#        print 'strip_binding = {}'.format([(str(x),str(y)) for x,y in strip_binding.items()]) 
     if (ivy_logic.is_constant(ast) or ivy_logic.is_variable(ast)) and ast in strip_binding:
         sname = strip_binding[ast]
         if sname not in ivy_logic.sig.symbols:
@@ -1300,7 +1300,7 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
                             raise iu.IvyError(p,"property {} depends on abstracted object {}"
                                               .format(pname(p),d))
 
-#    for x,y in new_actions.iteritems():
+#    for x,y in new_actions.items():
 #        print iu.pretty(ia.action_def_to_str(x,y))
 
 

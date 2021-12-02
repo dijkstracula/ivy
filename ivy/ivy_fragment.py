@@ -264,15 +264,15 @@ def create_macro_maps(assumes,asserts,macros):
                                 if u in macro_dep_map:
                                     macro_dep_map[w].update(macro_var_map[u])
     # print 'macro_var_map: {'
-    # for x,y in macro_var_map.iteritems():
+    # for x,y in macro_var_map.items():
     #     print '{} -> {}'.format(x,y)
     # print '}'
     # print 'macro_dep_map: {'
-    # for x,y in macro_dep_map.iteritems():
+    # for x,y in macro_dep_map.items():
     #     print '{} -> {}'.format(x,y)
     # print '}'
     # print 'macro_map: {'
-    # for x,y in macro_map.iteritems():
+    # for x,y in macro_map.items():
     #     print '{} -> {}'.format(x,y)
     # print '}'
 
@@ -474,7 +474,7 @@ def check_feu(assumes,asserts,macros):
     #                     report_interp_over_var(v,app,lf)
                         
 
-    # for x,y in strat_map.iteritems():
+    # for x,y in strat_map.items():
     #     if isinstance(x,tuple) and (il.is_interpreted_symbol(x[0]) or x[0].name == '='):
     #         for w in y.variables:
     #             for v in list(find(macro_var_map[w]).univ_variables) + [w]:
@@ -497,7 +497,7 @@ def get_assumes_and_asserts(preconds_only):
     assumes = []
     asserts = []
     macros = []
-#    for name,action in im.module.actions.iteritems():
+#    for name,action in im.module.actions.items():
         # for sa in action.iter_subactions():
         #     if isinstance(sa,ia.AssumeAction):
         #         assumes.append((sa.args[0],sa))

@@ -40,7 +40,7 @@ def module_type_check(self):
 #            print "axiom: {}".format(a)
     type_check_list(self,self.axioms)
 #        type_check_list(self,self.updates)
-#        type_check_list(self,[y for x,y in self.schemata.iteritems()])
+#        type_check_list(self,[y for x,y in self.schemata.items()])
     self.type_check_concepts()
 
 
