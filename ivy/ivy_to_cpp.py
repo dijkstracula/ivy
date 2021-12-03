@@ -5603,13 +5603,16 @@ public:
     void mk_enum(const char *sort_name, unsigned num_values, char const * const * value_names) {
         z3::func_decl_vector cs(ctx), ts(ctx);
         z3::sort sort = ctx.enumeration_sort(sort_name, num_values, value_names, cs, ts);
+        ctx.check_error();
         // can't use operator[] here because the value classes don't have nullary constructors
         enum_sorts.insert(std::pair<std::string, z3::sort>(sort_name,sort));
         enum_values.insert(std::pair<Z3_sort, z3::func_decl_vector>(sort,cs));
         sort_names.push_back(Z3_mk_string_symbol(ctx,sort_name));
+        ctx.check_error();
         sorts.push_back(sort);
         for(unsigned i = 0; i < num_values; i++){
             Z3_symbol sym = Z3_mk_string_symbol(ctx,value_names[i]);
+            ctx.check_error();
             decl_names.push_back(sym);
             decls.push_back(cs[i]);
             enum_to_int[sym] = i;
@@ -5657,6 +5660,7 @@ public:
         z3::sort range = (range_name == bool_name) ? ctx.bool_sort() : enum_sorts.find(range_name)->second;   
         z3::func_decl decl = ctx.function(decl_name,arity,&domain[0],range);
         decl_names.push_back(Z3_mk_string_symbol(ctx,decl_name));
+        ctx.check_error();
         decls.push_back(decl);
         decls_by_name.insert(std::pair<std::string, z3::func_decl>(decl_name,decl));
     }
@@ -5666,10 +5670,13 @@ public:
     }
 
     void add(const std::string &z3inp) {
-        z3::expr_vector exprs(ctx, Z3_parse_smtlib2_string(ctx, z3inp.c_str(), sort_names.size(), &sort_names[0], &sorts[0], decl_names.size(), &decl_names[0], &decls[0]));
+        auto expr = Z3_parse_smtlib2_string(ctx, z3inp.c_str(), sort_names.size(), &sort_names[0], &sorts[0], decl_names.size(), &decl_names[0], &decls[0]);
         ctx.check_error();
-        z3::expr conj = mk_and(exprs);
 
+        z3::expr_vector exprs(ctx, expr);
+        ctx.check_error();
+
+        z3::expr conj = mk_and(exprs);
         slvr.add(conj);
     }
 
