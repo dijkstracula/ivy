@@ -1179,12 +1179,12 @@ def get_lib_dirs(with_z3=True):
     import platform
     def file_dir_path(x):
         return os.path.dirname(os.path.abspath(x))
-    files = []
+    files = [__file__]
     if sys.version_info[0] >= 3 and with_z3:
         files.append(z3.__file__)
     dirs = [file_dir_path(x) for x in files]
-#    if platform.system() == 'Darwin':
-#        dirs.append('/usr/local/opt/openssl')  # work around Mac openssl bug
+    if platform.system() == 'Darwin':
+        dirs.append('/usr/local/opt/openssl')  # work around Mac openssl bug
     if with_z3 and 'Z3DIR' in os.environ:
         dirs.append('$Z3DIR')
     return dirs
@@ -5670,14 +5670,10 @@ public:
     }
 
     void add(const std::string &z3inp) {
-        auto expr = Z3_parse_smtlib2_string(ctx, z3inp.c_str(), sort_names.size(), &sort_names[0], &sorts[0], decl_names.size(), &decl_names[0], &decls[0]);
+        z3::expr fmla(ctx,Z3_parse_smtlib2_string(ctx, z3inp.c_str(), sort_names.size(), &sort_names[0], &sorts[0], decl_names.size(), &decl_names[0], &decls[0]));
         ctx.check_error();
 
-        z3::expr_vector exprs(ctx, expr);
-        ctx.check_error();
-
-        z3::expr conj = mk_and(exprs);
-        slvr.add(conj);
+        slvr.add(fmla);
     }
 
     bool solve() {
@@ -5971,10 +5967,7 @@ def main_int(is_ivyc):
                             cmd = 'cd {} & '.format(opt_outdir.get()) + cmd
                     else:
                         if target.get() in ['gen','test']:
-                            paths = ' '.join('-I{} -L{} -Wl,-rpath,{}'.format(
-                                os.path.join(_dir,'include'),
-                                os.path.join(_dir,'lib'),
-                                os.path.join(_dir,'lib')) for _dir in get_lib_dirs())
+                            paths = ' '.join('-I {} -L {} -Xlinker -rpath -Xlinker {}'.format(os.path.join(_dir,'include'),os.path.join(_dir,'lib'),os.path.join(_dir,'lib')) for _dir in get_lib_dirs())
                         else:
                             paths = ''
                         for lib in libs:
