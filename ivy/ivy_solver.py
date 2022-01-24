@@ -792,7 +792,8 @@ class HerbrandModel(object):
             fun = z3.Function
             self.model[order.to_z3()]
 #            print "sorting..."
-            elems = sorted(elems,SortOrder(z3_vs,order_atom,self.model))
+            sorter = functools.cmp_to_key(SortOrder(z3_vs,order_atom,self.model))
+            elems = sorted(elems,key=sorter)
         except IndexError:
             pass
 #        print "elems: {}".format(map(str,elems))
