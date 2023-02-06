@@ -5751,12 +5751,12 @@ def add_conjs_to_actions():
     asserts = [ia.AssertAction(conj.formula).set_lineno(conj.lineno) for conj in im.module.labeled_conjs]
     seq = ia.Sequence(*asserts)
     im.module.actions = dict((actname,ia.append_to_action(action,seq)) if actname in im.module.public_actions else (actname,action)
-                             for actname,action in im.module.actions.iteritems())
-    im.module.initializers.append(("__check_invariants",seq))
-    seq = ia.Sequence(*asserts)
-    seq.formal_params = []
-    im.module.initial_actions.append(seq)
-
+                             for actname,action in im.module.actions.items())
+    im.module.initializers = [(name,ia.append_to_action(action,seq))
+                              for (name,action) in im.module.initializers]
+    im.module.initial_actions = [ia.append_to_action(action,seq)
+                                 for action in im.module.initial_actions]
+        
 
 def main():
     main_int(False)
