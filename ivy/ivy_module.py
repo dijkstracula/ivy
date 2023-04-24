@@ -322,7 +322,7 @@ def resort_map_any_ast(m):
     return dict((a,lu.resort_ast(b,sort_refinement)) for a,b in m.items())
 
 
-module = None
+module: Module = None
 
 def instantiate_non_epr(non_epr,ground_terms):
     theory = []

@@ -1154,6 +1154,7 @@ def get_small_model(clauses, sorts_to_minimize, relations_to_minimize, final_con
 
     s = z3.Solver()
     the_fmla = clauses_to_z3(clauses)
+    import pdb; pdb.set_trace()
 #    iu.dbg('the_fmla')
     s.add(the_fmla)
     

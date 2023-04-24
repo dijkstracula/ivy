@@ -897,7 +897,6 @@ class Sig(object):
             else:
                 yield sym
     def add_symbol(self,symbol_name,sort):
-        #    print "add symbol: {} : {}".format(symbol_name,sort)
         if iu.ivy_have_polymorphism and symbol_name in polymorphic_symbols:
             if symbol_name not in self.symbols:
                 self.symbols[symbol_name] = Symbol(symbol_name,UnionSort())
