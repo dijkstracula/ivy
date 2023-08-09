@@ -1187,6 +1187,11 @@ def get_lib_dirs(with_z3=True):
         dirs.append('/usr/local/opt/openssl')  # work around Mac openssl bug
     if with_z3 and 'Z3DIR' in os.environ:
         dirs.append('$Z3DIR')
+
+    # Z3 header files are installed to the base of the virtual environment,
+    # so be sure to take those paths into consideration too.
+    if os.getenv("VIRTUAL_ENV"):
+        dirs.append(os.getenv("VIRTUAL_ENV"))
     return dirs
 
 
@@ -5973,6 +5978,7 @@ def main_int(is_ivyc):
                             _dir = lib[1]
                             _libdir = lib[2] if len(lib) >= 3 else (_dir  + '/lib')
                             paths += ' -I {}/include -L {} -Xlinker -rpath -Xlinker {}'.format(_dir,_libdir,_libdir)
+
                         if emit_main:
                             cmd = "g++ -Wno-parentheses-equality {} {} -g -o {} {}.cpp".format(gpp11_spec,paths,basename,basename)
                         else:
